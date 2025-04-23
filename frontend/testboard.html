@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .chessboard {
+            width: 640px;
+            height: 640px;
+            margin: 20px auto;
+            border: 2px solid #333;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+        }
+        
+        .square {
+            width: 80px;
+            height: 80px;
+            float: left;
+        }
+        
+        .white {
+            background-color: #fff;
+        }
+        
+        .black {
+            background-color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="chessboard" id="board"></div>
+
+    <script>
+        const board = document.getElementById('board');
+        for(let i = 0; i < 8; i++) {
+            for(let j = 0; j < 8; j++) {
+                const square = document.createElement('div');
+                square.className = `square ${(i + j) % 2 === 0 ? 'white' : 'black'}`;
+                board.appendChild(square);
+            }
+        }
+    </script>
+</body>
+</html>

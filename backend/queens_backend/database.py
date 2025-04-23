@@ -13,6 +13,7 @@ class Database:
             'password': os.getenv('DB_PASSWORD', ''),
             'database': 'puzzle'
         }
+        self.connection = self.get_connection()
 
     def get_connection(self):
         try:
@@ -23,19 +24,13 @@ class Database:
             return None
 
     def execute_query(self, query, params=None):
-        conn = self.get_connection()
-        if not conn:
-            return None
-
-        cursor = conn.cursor(dictionary=True)
         try:
+            cursor = self.connection.cursor(dictionary=True)
+            print(f"Executing query: {query}")  # Debug log
+            print(f"With parameters: {params}")  # Debug log
             cursor.execute(query, params or ())
-            if query.strip().upper().startswith('SELECT'):
-                result = cursor.fetchall()
-            else:
-                conn.commit()
-                result = cursor.lastrowid
-            return result
-        finally:
-            cursor.close()
-            conn.close()
+            self.connection.commit()
+            return cursor.fetchall()
+        except Exception as e:
+            print(f"Error executing query: {e}")  # Debug log
+            return None

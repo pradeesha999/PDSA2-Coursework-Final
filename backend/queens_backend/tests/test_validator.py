@@ -43,32 +43,106 @@ class SolutionValidator:
                     return False
         return True
 
+    def _is_safe(self, board, row, col):
+        """Check if a queen at position (row, col) is safe"""
+        # Check all diagonal directions
+        directions = [(-1, -1), (-1, 1), (1, -1), (1, 1)]  # Top-left, top-right, bottom-left, bottom-right
+        for dx, dy in directions:
+            x, y = row, col
+            while 0 <= x < self.board_size and 0 <= y < self.board_size:
+                x += dx
+                y += dy
+                if 0 <= x < self.board_size and 0 <= y < self.board_size and board[x][y] == 1:
+                    return False
+        return True
+
 import unittest
 from backend.queens_backend.validator import SolutionValidator
 
 class TestValidator(unittest.TestCase):
     def setUp(self):
+        """Initialize validator and test data"""
         self.validator = SolutionValidator()
-        self.valid_solution = "0,0,0,0,1,0,0,0;0,0,0,0,0,0,1,0;0,0,0,1,0,0,0,0;0,0,0,0,0,0,0,1;0,1,0,0,0,0,0,0;0,0,0,0,0,1,0,0;1,0,0,0,0,0,0,0;0,0,1,0,0,0,0,0"
+        
+        # Known valid solutions
+        self.valid_solutions = [
+            "0,0,0,0,1,0,0,0;0,0,0,0,0,0,1,0;0,0,0,1,0,0,0,0;0,0,0,0,0,0,0,1;0,1,0,0,0,0,0,0;0,0,0,0,0,1,0,0;1,0,0,0,0,0,0,0;0,0,1,0,0,0,0,0",
+            "1,0,0,0,0,0,0,0;0,0,0,0,1,0,0,0;0,0,0,0,0,0,0,1;0,0,0,0,0,1,0,0;0,0,1,0,0,0,0,0;0,0,0,0,0,0,1,0;0,1,0,0,0,0,0,0;0,0,0,1,0,0,0,0"
+        ]
+        
+        # Known invalid solutions
+        self.invalid_solutions = {
+            "row_conflict": "1,1,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0",
+            "column_conflict": "1,0,0,0,0,0,0,0;1,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0",
+            "diagonal_conflict": "1,0,0,0,0,0,0,0;0,1,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0",
+            "wrong_size": "1,0,0;0,1,0;0,0,1",
+            "too_many_queens": "1,1,1,1,1,1,1,1;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0",
+            "too_few_queens": "1,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0"
+        }
 
-    def test_valid_solution(self):
-        """Test a known valid solution"""
-        self.assertTrue(self.validator.is_valid_solution(self.valid_solution))
+    def test_valid_solutions(self):
+        """Test known valid solutions"""
+        for solution in self.valid_solutions:
+            with self.subTest(solution=solution):
+                self.assertTrue(
+                    self.validator.is_valid_solution(solution),
+                    f"Valid solution was rejected: {solution}"
+                )
 
     def test_invalid_dimensions(self):
         """Test board with wrong dimensions"""
-        invalid_board = "0,0,0;0,0,0;0,0,0"
-        self.assertFalse(self.validator.is_valid_solution(invalid_board))
+        self.assertFalse(
+            self.validator.is_valid_solution(self.invalid_solutions["wrong_size"]),
+            "Board with wrong dimensions was accepted"
+        )
 
-    def test_invalid_queen_count(self):
-        """Test board with wrong number of queens"""
-        too_many_queens = "1,1,0,0,0,0,0,0;0,0,0,0,0,0,1,0;0,0,0,1,0,0,0,0;0,0,0,0,0,0,0,1;0,1,0,0,0,0,0,0;0,0,0,0,0,1,0,0;1,0,0,0,0,0,0,0;0,0,1,0,0,0,0,0"
-        self.assertFalse(self.validator.is_valid_solution(too_many_queens))
+    def test_row_conflict(self):
+        """Test queens in same row"""
+        self.assertFalse(
+            self.validator.is_valid_solution(self.invalid_solutions["row_conflict"]),
+            "Queens in same row were accepted"
+        )
 
-    def test_invalid_diagonal(self):
-        """Test queens attacking on diagonal"""
-        diagonal_attack = "1,0,0,0,0,0,0,0;0,1,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0;0,0,0,0,0,0,0,0"
-        self.assertFalse(self.validator.is_valid_solution(diagonal_attack))
+    def test_column_conflict(self):
+        """Test queens in same column"""
+        self.assertFalse(
+            self.validator.is_valid_solution(self.invalid_solutions["column_conflict"]),
+            "Queens in same column were accepted"
+        )
+
+    def test_diagonal_conflict(self):
+        """Test queens on same diagonal"""
+        self.assertFalse(
+            self.validator.is_valid_solution(self.invalid_solutions["diagonal_conflict"]),
+            "Queens on same diagonal were accepted"
+        )
+
+    def test_queen_count(self):
+        """Test incorrect number of queens"""
+        self.assertFalse(
+            self.validator.is_valid_solution(self.invalid_solutions["too_many_queens"]),
+            "Too many queens were accepted"
+        )
+        self.assertFalse(
+            self.validator.is_valid_solution(self.invalid_solutions["too_few_queens"]),
+            "Too few queens were accepted"
+        )
+
+    def test_malformed_input(self):
+        """Test invalid input formats"""
+        invalid_inputs = [
+            "",  # Empty string
+            "invalid",  # Invalid format
+            "1,2,3;4,5,6",  # Invalid numbers
+            "a,b,c;d,e,f",  # Non-numeric
+            None,  # None input
+        ]
+        for invalid_input in invalid_inputs:
+            with self.subTest(invalid_input=invalid_input):
+                self.assertFalse(
+                    self.validator.is_valid_solution(invalid_input),
+                    f"Invalid input was accepted: {invalid_input}"
+                )
 
 if __name__ == '__main__':
     unittest.main()
