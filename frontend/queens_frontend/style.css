@@ -4,7 +4,7 @@
     --accent-color: #e74c3c;
     --light-color: #ecf0f1;
     --dark-color: #2c3e50;
-    --board-size: 640px;  /* Increased from 480px */
+    --board-size: 640px; /* Larger chessboard */
     --cell-size: calc(var(--board-size) / 8);
 }
 
@@ -14,10 +14,18 @@
     box-sizing: border-box;
 }
 
+/* General layout */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    padding: 20px;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #2c2c2c, #1a1a1a); /* Dark gradient */
+    color: #f8f8f8; /* Light text for contrast */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
 }
 
 .container {
@@ -27,23 +35,87 @@ body {
 
 header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-size: 2.5rem; /* Larger font size */
+    color: #ffffff; /* White color for lighter appearance */
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Add a subtle shadow for better visibility */
+    margin-bottom: 20px;
 }
 
 .user-panel {
     margin: 20px 0;
 }
 
-.game-section {
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+aside#controls {
+    margin-top: 20px;
+    text-align: center;
+}
+
+aside#controls input,
+aside#controls button {
+    margin: 5px;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+}
+
+aside#controls input {
+    padding: 10px;
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
+
+/* Buttons */
+aside#controls button {
+    background-color: #6b4f3f; /* Dark brown to match the chessboard */
+    color: #f8f8f8; /* Light text for contrast */
+    border: 2px solid #e6cdb5; /* Light beige border */
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+aside#controls button:hover {
+    background-color: #e6cdb5; /* Light beige on hover */
+    color: #6b4f3f; /* Dark text on hover */
+    transform: scale(1.05); /* Slight zoom effect */
+}
+
+footer {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #666;
+}
+
+game-section {
     display: flex;
     gap: 40px;
     margin-bottom: 30px;
 }
 
+/* Game Layout */
 .game-layout {
     display: flex;
     justify-content: space-between;
     gap: 20px;
+    margin-top: 20px;
 }
 
 .left-panel, .right-panel {
@@ -54,7 +126,12 @@ header {
 }
 
 .center-panel {
-    width: 60%;
+    flex: 2; /* Chessboard takes more space */
+}
+
+.right-panel {
+    flex: 1; /* Rules section takes less space */
+    max-width: 300px;
 }
 
 .board-container {
@@ -68,41 +145,53 @@ header {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.chessboard {
-    width: 640px;
-    height: 640px;
-    margin: 20px auto;
-    border: 15px solid #8B4513;
+/* Chessboard container */
+#board {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    grid-template-rows: repeat(8, 1fr);
+    width: var(--board-size); /* Larger width */
+    height: var(--board-size); /* Larger height */
+    border: 3px solid #444; /* Darker border for contrast */
+    margin: 20px auto;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5); /* Stronger shadow for depth */
 }
 
+/* Chessboard squares */
 .square {
-    width: 80px;
-    height: 80px;
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 3em;
+    font-size: 24px;
+    font-weight: bold;
     cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth hover effect */
 }
 
-.white { background-color: #f0d9b5; }
-.black { background-color: #b58863; }
+.square.white {
+    background-color: #e6cdb5; /* Light beige for white squares */
+}
 
+.square.black {
+    background-color: #6b4f3f; /* Dark brown for black squares */
+}
+
+/* Updated queen icon */
 .square.has-queen::after {
-    content: '♕'; /* Unicode for the queen chess piece */
-    font-size: 50px;
-    color: #000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    content: '♕'; /* Unicode for a black queen chess piece */
+    font-size: 36px; /* Slightly smaller size */
+    color: #000000; /* Black color for the queen */
+    text-shadow: none; /* Remove bold shadow */
+    font-weight: normal; /* Less bold appearance */
+    transform: scale(1); /* Normal size */
+    transition: transform 0.3s ease, color 0.3s ease;
 }
 
+/* Hover effect for squares */
 .square:hover {
-    background-color: #e9b550 !important;
+    background-color: rgba(255, 255, 0, 0.3); /* Highlight square */
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
@@ -157,6 +246,56 @@ input#username {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+/* Rules Section */
+.rules {
+    background: #ffffff; /* White background for contrast */
+    color: #333; /* Dark text for readability */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.rules h2 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    color: #2c3e50; /* Darker color for the heading */
+}
+
+.rules ul {
+    list-style: disc;
+    padding-left: 20px;
+}
+
+.rules ul li {
+    margin-bottom: 10px;
+}
+
+#leaderboard {
+    margin-top: 20px;
+    text-align: center;
+}
+
+#leaderboard h2 {
+    font-size: 1.5rem;
+    color: #333;
+}
+
+#leaderboard ul {
+    list-style: none;
+    padding: 0;
+}
+
+#leaderboard ul li {
+    font-size: 16px;
+    margin: 5px 0;
+    padding: 5px 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
 @media (max-width: 768px) {
     :root {
         --board-size: 320px;
@@ -171,5 +310,30 @@ input#username {
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: center;
+    }
+
+    #board {
+        width: 400px; /* Smaller width for mobile */
+        height: 400px; /* Smaller height for mobile */
+    }
+
+    aside#controls input,
+    aside#controls button {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    .game-layout {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .right-panel {
+        max-width: 100%;
+        margin-top: 20px;
     }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eight Queens Puzzle</title>
+    <title>Eight Queens Chess Game</title>
     <style>
         /* Include critical CSS directly to ensure board displays */
         .chessboard {
@@ -23,59 +23,44 @@
         
         .white { background-color: #fff; }
         .black { background-color: #999; }
-
-        .game-layout {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .left-panel, .right-panel {
-            width: 20%;
-        }
-
-        .center-panel {
-            width: 60%;
-        }
     </style>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
+    <div id="game-container">
         <header>
             <h1>Eight Queens Puzzle</h1>
         </header>
 
-        <main class="game-layout">
-            <div class="left-panel">
-                <div class="user-panel">
-                    <input type="text" id="username" placeholder="Enter username">
-                    <button id="registerBtn">Register</button>
-                </div>
-                <div class="controls">
-                    <button id="validateBtn">Validate Solution</button>
-                    <button id="resetBtn">Reset Board</button>
-                    <button id="solveBtn">Show Solution</button>
-                </div>
-            </div>
+        <div class="game-layout">
             <div class="center-panel">
-                <div class="chessboard" id="board"></div>
-                <div class="queen-counter">Queens placed: <span id="queenCount">0</span>/8</div>
+                <div id="board"></div>
             </div>
+
             <div class="right-panel">
-                <div class="leaderboard">
-                    <h2>Leaderboard</h2>
-                    <div id="leaderboardList"></div>
-                </div>
-                <div class="rules">
+                <section class="rules">
                     <h2>Rules</h2>
                     <ul>
-                        <li>Place 8 queens on the board</li>
-                        <li>No queen should be able to attack another queen</li>
-                        <li>Queens move horizontally, vertically, and diagonally</li>
+                        <li>Place exactly 8 queens on the board.</li>
+                        <li>Queens cannot attack each other.</li>
+                        <li>No two queens can share the same row, column, or diagonal.</li>
+                        <li>Click on a square to place or remove a queen.</li>
                     </ul>
-                </div>
+                </section>
             </div>
-        </main>
+        </div>
+
+        <aside id="controls">
+            <input type="text" id="username" placeholder="Enter your username" />
+            <button id="registerBtn">Register</button>
+            <button id="validateBtn">Validate Solution</button>
+            <button id="resetBtn">Reset Board</button>
+            <div id="queenCountDisplay">Queens Placed: <span id="queenCount">0</span></div>
+        </aside>
+
+        <footer>
+            <p>Developed by [Your Name]</p>
+        </footer>
     </div>
 
     <script>

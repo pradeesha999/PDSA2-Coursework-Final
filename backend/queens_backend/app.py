@@ -14,17 +14,33 @@ def home():
     return "Flask backend is running. Use the API endpoints."
 
 @app.route('/api/register', methods=['POST'])
-def register_player():
-    """Register a new player"""
+def register_user():
+    """Register a new user"""
     data = request.json
     username = data.get('username')
-    
+
+    print(f"Registering username: {username}")  # Debug log
+
     if not username:
         return jsonify({'success': False, 'message': 'Username is required'}), 400
 
-    query = "INSERT IGNORE INTO players (username) VALUES (%s)"
-    db.execute_query(query, (username,))
-    return jsonify({'success': True, 'message': 'Player registered successfully'})
+    # Check if the user already exists
+    user_query = "SELECT id FROM players WHERE username = %s"
+    user_result = db.execute_query(user_query, (username,))
+    print(f"User query result: {user_result}")  # Debug log
+
+    if user_result:
+        return jsonify({'success': False, 'message': 'Username already exists'}), 400
+
+    # Insert the new user
+    insert_query = "INSERT INTO players (username, score) VALUES (%s, 0)"
+    try:
+        db.execute_query(insert_query, (username,))
+        print(f"User {username} registered successfully")  # Debug log
+        return jsonify({'success': True, 'message': 'User registered successfully'})
+    except Exception as e:
+        print(f"Error registering user: {e}")  # Debug log
+        return jsonify({'success': False, 'message': 'Error registering user'}), 500
 
 @app.route('/api/validate', methods=['POST'])
 def validate_solution():
@@ -33,9 +49,8 @@ def validate_solution():
     username = data.get('username')
     board_state = data.get('board')
 
-    # Debug: Print the received data
-    print(f"Received username: {username}")
-    print(f"Received board state: {board_state}")
+    print(f"Received username: {username}")  # Debug log
+    print(f"Received board state: {board_state}")  # Debug log
 
     if not username or not board_state:
         return jsonify({'success': False, 'message': 'Username and board state are required'}), 400
@@ -53,6 +68,7 @@ def validate_solution():
     print(f"Player query result: {player_result}")  # Debug log
 
     if not player_result:
+        print(f"Player not found for username: {username}")  # Debug log
         return jsonify({'success': False, 'message': 'Player not found'}), 404
 
     player_id = player_result[0]['id']
@@ -68,15 +84,6 @@ def validate_solution():
     except Exception as e:
         print(f"Error storing solution: {e}")  # Debug log
         return jsonify({'success': False, 'message': 'Error storing solution'}), 500
-
-    # Update player's score
-    update_score_query = "UPDATE players SET score = score + 1 WHERE id = %s"
-    try:
-        db.execute_query(update_score_query, (player_id,))
-        print(f"Player score updated for player ID {player_id}")  # Debug log
-    except Exception as e:
-        print(f"Error updating player score: {e}")  # Debug log
-        return jsonify({'success': False, 'message': 'Error updating player score'}), 500
 
     return jsonify({'success': True, 'message': 'Solution stored successfully'})
 

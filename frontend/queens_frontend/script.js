@@ -1,53 +1,4 @@
 document.addEventListener('DOMContentLoaded', function () {
-    initializeBoard();
-
-    let queensPlaced = 0; // Tracks the number of queens placed
-    let boardState = Array(8).fill().map(() => Array(8).fill(0)); // 8x8 board state
-
-    function initializeBoard() {
-        const board = document.getElementById('board');
-        board.innerHTML = ''; // Clear the board
-
-        for (let i = 0; i < 8; i++) {
-            for (let j = 0; j < 8; j++) {
-                const square = document.createElement('div');
-                square.className = `square ${(i + j) % 2 === 0 ? 'white' : 'black'}`;
-                square.dataset.row = i;
-                square.dataset.col = j;
-
-                // Add click event listener
-                square.addEventListener('click', handleSquareClick);
-
-                board.appendChild(square);
-            }
-        }
-    }
-
-    function handleSquareClick(event) {
-        const square = event.target;
-        const row = parseInt(square.dataset.row);
-        const col = parseInt(square.dataset.col);
-
-        if (!square.classList.contains('has-queen')) {
-            if (queensPlaced < 8) {
-                square.classList.add('has-queen'); // Add queen
-                boardState[row][col] = 1; // Update board state
-                queensPlaced++;
-            }
-        } else {
-            square.classList.remove('has-queen'); // Remove queen
-            boardState[row][col] = 0; // Update board state
-            queensPlaced--;
-        }
-
-        // Update the queen counter
-        document.getElementById('queenCount').textContent = queensPlaced;
-
-        // Debug: Log the current board state and queen count
-        console.log('Current board state:', boardState);
-        console.log('Queens placed:', queensPlaced);
-    }
-
     class QueensGame {
         constructor() {
             this.board = document.getElementById('board');
@@ -55,8 +6,68 @@ document.addEventListener('DOMContentLoaded', function () {
             this.usernameInput = document.getElementById('username');
             this.queensPlaced = 0;
             this.boardState = Array(8).fill().map(() => Array(8).fill(0));
-            initializeBoard();
+
+            // Initialize the board and controls
+            this.initializeBoard();
             this.initializeControls();
+        }
+
+        initializeBoard() {
+            console.log('Initializing the board...'); // Debug log
+            this.board.innerHTML = ''; // Clear the board (if not already cleared)
+
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const square = document.createElement('div');
+                    square.className = `square ${(row + col) % 2 === 0 ? 'white' : 'black'}`;
+                    square.dataset.row = row;
+                    square.dataset.col = col;
+
+                    // Add click event listener and bind the QueensGame instance
+                    square.addEventListener('click', this.handleSquareClick.bind(this));
+
+                    this.board.appendChild(square);
+                }
+            }
+        }
+
+        handleSquareClick(event) {
+            const square = event.target;
+            const row = parseInt(square.dataset.row);
+            const col = parseInt(square.dataset.col);
+
+            if (!square.classList.contains('has-queen')) {
+                if (this.queensPlaced < 8) {
+                    square.classList.add('has-queen'); // Add queen
+                    this.boardState[row][col] = 1; // Update board state
+                    this.queensPlaced++; // Increment queen counter
+                } else {
+                    alert('You can only place 8 queens on the board.');
+                }
+            } else {
+                square.classList.remove('has-queen'); // Remove queen
+                this.boardState[row][col] = 0; // Update board state
+                this.queensPlaced--; // Decrement queen counter
+            }
+
+            // Update the queen counter display
+            this.queenCounter.textContent = this.queensPlaced;
+
+            // Debug: Log the current board state and queen count
+            console.log('Current board state:', this.boardState);
+            console.log('Queens placed:', this.queensPlaced);
+        }
+
+        resetBoard() {
+            console.log('Resetting the board...'); // Debug log
+
+            // Reset the board state and queen counter
+            this.queensPlaced = 0;
+            this.boardState = Array(8).fill().map(() => Array(8).fill(0));
+            this.queenCounter.textContent = '0';
+
+            // Clear and reinitialize the chessboard
+            this.initializeBoard();
         }
 
         initializeControls() {
@@ -93,40 +104,35 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            // Debug: Log the number of queens placed
-            console.log('Queens placed during validation:', queensPlaced);
+            console.log('Queens placed during validation:', this.queensPlaced);
 
-            if (queensPlaced !== 8) {
+            if (this.queensPlaced !== 8) {
                 alert('Please place exactly 8 queens on the board.');
                 return;
             }
 
             const boardString = this.boardState.map(row => row.join(',')).join(';');
+            console.log('Sending board state:', boardString); // Debug log
 
-            // Debug: Log the board state being sent
-            console.log('Sending board state:', boardString);
+            try {
+                const response = await fetch('http://localhost:5000/api/validate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, board: boardString })
+                });
 
-            const response = await fetch('http://localhost:5000/api/validate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, board: boardString })
-            });
-
-            const data = await response.json();
-            if (data.success) {
-                alert('Valid solution! Solution stored successfully.');
-            } else {
-                alert(data.message || 'Invalid solution.');
+                const data = await response.json();
+                if (data.success) {
+                    alert('Valid solution! Solution stored successfully.');
+                    fetchSolutions();
+                    this.resetBoard();
+                } else {
+                    alert(data.message || 'Invalid solution.');
+                }
+            } catch (error) {
+                console.error('Error validating solution:', error);
+                alert('An error occurred while validating the solution.');
             }
-        }
-
-        resetBoard() {
-            this.queensPlaced = 0;
-            this.boardState = Array(8).fill().map(() => Array(8).fill(0));
-            this.queenCounter.textContent = '0';
-            document.querySelectorAll('.square').forEach(square => {
-                square.classList.remove('has-queen');
-            });
         }
     }
 

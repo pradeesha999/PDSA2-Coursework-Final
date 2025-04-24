@@ -17,6 +17,7 @@ class SolutionValidator:
 
             # Count queens
             queens = self._get_queen_positions(board)
+            print(f"Queen positions: {queens}")  # Debug log
             if len(queens) != 8:
                 print(f"Invalid queen count: {len(queens)}")  # Debug log
                 return False
@@ -25,7 +26,8 @@ class SolutionValidator:
             for i, pos1 in enumerate(queens):
                 row1, col1 = pos1
                 for j in range(i + 1, len(queens)):
-                    row2, col2 = queens[j]
+                    pos2 = queens[j]  # Assign pos2 here
+                    row2, col2 = pos2
 
                     # Check row and column
                     if row1 == row2 or col1 == col2:
@@ -37,6 +39,7 @@ class SolutionValidator:
                         print(f"Diagonal conflict between queens at {pos1} and {pos2}")  # Debug log
                         return False
 
+            print("Solution is valid")  # Debug log
             return True
 
         except Exception as e:
@@ -48,6 +51,7 @@ class SolutionValidator:
         try:
             rows = board_state.split(';')
             board = [list(map(int, row.split(','))) for row in rows]
+            print(f"Parsed board state: {board}")  # Debug log
             return board
         except Exception as e:
             print(f"Error parsing board state: {e}")
@@ -58,10 +62,11 @@ class SolutionValidator:
         return len(board) == self.board_size and all(len(row) == self.board_size for row in board)
 
     def _get_queen_positions(self, board):
-        """Extract queen positions from the board"""
+        """Get the positions of all queens on the board"""
         queens = []
-        for i in range(self.board_size):
-            for j in range(self.board_size):
-                if board[i][j] == 1:
-                    queens.append((i, j))
+        for row_idx, row in enumerate(board):
+            for col_idx, cell in enumerate(row):
+                if cell == 1:  # Queen is represented by 1
+                    queens.append((row_idx, col_idx))
+        print(f"Queen positions: {queens}")  # Debug log
         return queens
